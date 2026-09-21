@@ -1,0 +1,34 @@
+# Keep the build context to what the image actually needs: pyproject.toml,
+# uv.lock and src/. Everything below either belongs to the host, is rebuilt
+# inside the image, or is not shipped.
+
+# Host virtualenv -- would shadow the one built for the image, and is the
+# single biggest thing in this directory.
+.venv/
+
+# Version control and tooling metadata
+.git/
+.gitattributes
+.gitignore
+.github/
+.claude/
+.vscode/
+.idea/
+
+# Tests and their fixtures are not part of the runtime
+tests/
+
+# Caches and build leftovers
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# Local-only files
+.python-version
+*.pdf
+Dockerfile
+.dockerignore
