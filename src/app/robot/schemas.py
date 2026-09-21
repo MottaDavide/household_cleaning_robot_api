@@ -3,6 +3,7 @@ from pydantic import Field
 from uuid import UUID
 from datetime import datetime
 from enum import StrEnum
+from fastapi.responses import Response
 
 
 # pdf states there are 2 robot models
@@ -61,4 +62,7 @@ class CleanReport(CustomBase):
     final_position: Coordinate
     duration_ms: int = Field(..., ge=0) 
     error: ErrorDetails | None = None 
+    
+class CsvResponse(Response):
+    media_type = "text/csv"
     

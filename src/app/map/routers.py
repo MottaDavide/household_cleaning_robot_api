@@ -9,7 +9,11 @@ router = APIRouter(
     tags=["map"]
 )
 
-@router.put("/map", status_code = status.HTTP_200_OK, response_model = MapResponse, summary="extension, content and map validation according to the 'business' rules")
+@router.put("/map", status_code = status.HTTP_200_OK, response_model = MapResponse, summary="extension, content and map validation according to the 'business' rules",
+            responses={
+    415: {"description": "The filename extension is not .txt or .json"},
+    422: {"description": "The file contents do not describe a valid map"},
+},)
 async def upload_map(file: UploadFile ) -> MapResponse:
     filename = file.filename or ""
     
