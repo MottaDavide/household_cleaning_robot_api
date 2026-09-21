@@ -31,7 +31,6 @@ async def upload_map(file: UploadFile ) -> MapResponse:
         ) from e
         
     except InvalidMapContentError as e:
-        # Errore 422 se le regole del dominio non sono rispettate[cite: 1]
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, 
             detail=str(e)
