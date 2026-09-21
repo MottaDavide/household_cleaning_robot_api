@@ -11,6 +11,7 @@ from httpx import Response
 
 from src.app.core import state
 from src.app.main import app
+from src.app.map.services import process_map_upload
 
 # The part media type we send for every upload, pinned on purpose:
 #
@@ -51,6 +52,22 @@ def client() -> Iterator[TestClient]:
     # nothing today and keeps the suite correct if a lifespan is added later.
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def load_map() -> Callable[[str], None]:
+    """Put a map in place without going through HTTP.
+
+    Cleaning tests are about the robot, not about upload plumbing, so they
+    state their world as a TXT grid ("oxo\\nooo") and go straight to the
+    parser. Uses the real loader rather than hand-building the tiles dict, so
+    these tests stay honest about the shape /clean actually receives.
+    """
+
+    def _load(grid: str) -> None:
+        process_map_upload("fixture.txt", grid.encode("utf-8"))
+
+    return _load
 
 
 @pytest.fixture
