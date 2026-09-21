@@ -3,6 +3,8 @@ from src.app.robot.exceptions import CollisionError, NoMapLoadedError, InvalidSt
 from src.app.core import state
 import uuid
 from datetime import datetime, UTC
+import csv # RFC 4180
+import io
 
 
 def _process_tile(pos: tuple[int, int], robot_model: RobotModel, cleaned_tiles: list[Coordinate]) -> None:
@@ -102,6 +104,32 @@ def execute_cleaning_session(request: CleanRequest) -> CleanReport:
     state.session_history.append(report.model_dump(mode='json'))
 
     return report
+
+
+def generate_csv_history() -> str:
+    f=io.StringIO()
+    fieldnames = ["id","started_at","state","robot_model",
+                "submitted_actions","successful_steps",
+                "cleaned_tiles","duration_ms"]
+    writer = csv.DictWriter(
+        f=f,
+        fieldnames=fieldnames
+    )
+    
+    writer.writeheader()
+    for session in state.session_history:
+        writer.writerow(
+            {'id': session['session_id'], 
+             'started_at': session['started_at'],
+             'state': session['state'],
+             'robot_model': session['robot_model'],
+             "submitted_actions": session['submitted_actions'],
+             "successful_steps": session['successful_steps'],
+             "cleaned_tiles" : len(session['cleaned_tiles']),
+             "duration_ms": session['duration_ms']})
+        
+    return f.getvalue()
+
     
     
     

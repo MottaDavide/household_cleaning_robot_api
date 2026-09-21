@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import Response
 from src.app.robot.schemas import CleanRequest, CleanReport
-from src.app.robot.services import execute_cleaning_session
-from src.app.robot.exceptions import NoMapLoadedError, InvalidStartCoordinateError, CollisionError
-
-router = APIRouter(tags=["Robot"])
+from src.app.robot.services import execute_cleaning_session, generate_csv_history
+from src.app.robot.exceptions import NoMapLoadedError, InvalidStartCoordinateError, CollisionError, InvalidDurationError
+router = APIRouter(tags=["robot"])
 
 @router.post("/clean", status_code=status.HTTP_200_OK, response_model=CleanReport, summary="Report of the cleaning task")
-def clean(request: CleanRequest):
+async def clean(request: CleanRequest):
     
     try:
         return execute_cleaning_session(request)
@@ -26,5 +26,18 @@ def clean(request: CleanRequest):
     except CollisionError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, 
-            content=e.report.model_dump(mode='json') # pdf dice che vuole body=report
+            detail=e.report.model_dump(mode='json') # pdf dice che vuole body=report
         ) from e
+        
+        
+@router.get("/history", status_code=status.HTTP_200_OK, summary="Download cleaning-session history as RFC 4180-compatible CSV.")
+async def get_history() -> Response:
+    try:
+        csv_content = generate_csv_history()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Imposiible to generate the downloadable history",
+        ) from e
+        
+    return Response(content=csv_content, media_type="text/csv")
