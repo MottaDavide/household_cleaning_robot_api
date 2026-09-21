@@ -37,7 +37,7 @@ async def get_history() -> Response:
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Imposiible to generate the downloadable history",
+            detail="Impossible to generate the downloadable history",
         ) from e
         
     return Response(content=csv_content, media_type="text/csv")
