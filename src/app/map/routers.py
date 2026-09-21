@@ -1,0 +1,38 @@
+from fastapi import APIRouter, status, UploadFile, HTTPException
+from src.app.map.schemas import MapResponse
+from src.app.map.services import process_map_upload
+from src.app.map.exceptions import UnsupportedExtensionError, InvalidMapContentError
+
+
+
+router = APIRouter(
+    tags=["map"]
+)
+
+@router.put("/map", status_code = status.HTTP_200_OK, response_mode = MapResponse)
+async def upload_map(file: UploadFile ) -> MapResponse:
+    filename = file.filename or ""
+    
+    try:
+        content = await file.read()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Impossible to read the file."
+        ) from e
+        
+    try:
+        summary_dict = process_map_upload(filename, content)
+        return MapResponse(**summary_dict)
+    except UnsupportedExtensionError as e:
+        # Errore come nel pdf (415) quando non c'è formato valido
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, 
+            detail=str(e)
+        ) from e
+        
+    except InvalidMapContentError as e:
+        # Errore 422 se le regole del dominio non sono rispettate[cite: 1]
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+            detail=str(e)
+        ) from e
