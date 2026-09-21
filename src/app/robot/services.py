@@ -119,7 +119,7 @@ def generate_csv_history() -> str:
     writer.writeheader()
     for session in state.session_history:
         writer.writerow(
-            {'id': session['session_id'], 
+            {'id': session['id'], 
              'started_at': session['started_at'],
              'state': session['state'],
              'robot_model': session['robot_model'],
