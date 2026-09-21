@@ -17,7 +17,7 @@ async def upload_map(file: UploadFile ) -> MapResponse:
         content = await file.read()
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Impossible to read the file."
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Impossible to read the file."
         ) from e
         
     try:

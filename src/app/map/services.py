@@ -10,7 +10,7 @@ def _parse_txt_map(text_content: str) -> tuple[dict, int, int]:
     
     normalized_text = text_content.replace("\r\n", "\n")
     if normalized_text.endswith("\n"):
-        normalized_text = normalized_text[-1]
+        normalized_text = normalized_text[:-1]
         
     lines = normalized_text.split("\n")
     rows = len(lines)
@@ -19,8 +19,8 @@ def _parse_txt_map(text_content: str) -> tuple[dict, int, int]:
     if rows == 0 or lines[0] == "":
         raise InvalidMapContentError("The map must contain at least on row and one column.")
     cols = len(lines[0])
-    if cols == 0:
-        raise InvalidMapContentError("The map must contain at lease one column.")
+    #if cols == 0:
+        #raise InvalidMapContentError("The map must contain at least one column.")
     
     tiles_dict = {}
     for y, line in enumerate(lines): # the pdf state how to move, i.e. (x, y+1) -> to south
@@ -31,7 +31,7 @@ def _parse_txt_map(text_content: str) -> tuple[dict, int, int]:
         
         # every row must have the same number of columns
         if len(line) != cols:
-            raise InvalidMapContentError(f"Every row must have the same number of column. Error at row {i}, expected {cols} number of columns, got {len(line)}")
+            raise InvalidMapContentError(f"Every row must have the same number of column. Error at row {y}, expected {cols} number of columns, got {len(line)}")
         
         
         # check chars (x or o)
@@ -41,16 +41,16 @@ def _parse_txt_map(text_content: str) -> tuple[dict, int, int]:
             elif char == 'x':
                 tiles_dict[(x, y)] = {"walkable": False, "dirty": False}
             else:
-                raise InvalidMapContentError(f"Not valid character found at row {i}, column {j}. Expected 'x' or 'o', got {char} instead")
+                raise InvalidMapContentError(f"Not valid character found at row {y}, column {x}. Expected 'x' or 'o', got '{char}' instead")
             
         
-        return tiles_dict, rows, cols
+    return tiles_dict, rows, cols
     
     
 # come sopra ma per il json
 def _parse_json_map(content: bytes)-> tuple[dict, int, int]:
     try:
-        data = json.load(content)
+        data = json.loads(content)
     except Exception as e:
         raise InvalidMapContentError(f"Not valid JSON format: {e}") from e
     
@@ -65,7 +65,7 @@ def _parse_json_map(content: bytes)-> tuple[dict, int, int]:
     tiles_dict = {}
     for tile in map_model.tiles:
         # x and y are integers within the declared bounds;
-        if not (0 < tile.x < cols and 0 < tile.y < rows):
+        if not (0 <= tile.x < cols and 0 <= tile.y < rows):
             raise InvalidMapContentError(f"Coordinate ({tile.x}, {tile.y}) out of bound.")
         
         # each coordinate and duplicate coordinates are invalid;
