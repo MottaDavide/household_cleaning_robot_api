@@ -26,11 +26,12 @@ lifetime of the process — there is no database, and nothing survives a restart
 
 ## Requirements
 
-| | |
-|---|---|
-| **Python** | **3.12** — pinned in [`.python-version`](.python-version) and enforced by `requires-python = ">=3.12"` in [`pyproject.toml`](pyproject.toml). Developed against CPython 3.12.13. |
-| **Package manager** | [uv](https://docs.astral.sh/uv/) 0.11.24. [`uv.lock`](uv.lock) pins every transitive dependency. |
-| **Docker** | Only if you want the containerised path. Any version with BuildKit (default since 23.0). |
+
+|                     |                                                                                                                                                                                   |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Python**          | **3.12** — pinned in [`.python-version`](.python-version) and enforced by `requires-python = ">=3.12"` in [`pyproject.toml`](pyproject.toml). Developed against CPython 3.12.13. |
+| **Package manager** | [uv](https://docs.astral.sh/uv/) 0.11.24. [`uv.lock`](uv.lock) pins every transitive dependency.                                                                                  |
+| **Docker**          | Only if you want the containerised path. Any version with BuildKit (default since 23.0).                                                                                          |
 
 The assignment allows Python 3.11+, but this project targets 3.12 because
 `uv.lock` was resolved against it. Running on 3.11 means re-resolving the
@@ -59,8 +60,8 @@ docker build -t cleaning-robot .
 docker run --rm -p 8000:8000 cleaning-robot
 ```
 
-The service is then at <http://localhost:8000>, with interactive docs at
-<http://localhost:8000/docs> and the schema at <http://localhost:8000/openapi.json>.
+The service is then at [http://localhost:8000](http://localhost:8000), with interactive docs at
+[http://localhost:8000/docs](http://localhost:8000/docs) and the schema at [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json).
 
 Check it is alive:
 
@@ -143,13 +144,14 @@ here:
 
 Useful variations:
 
-| Command | What it does |
-|---|---|
-| `uv sync --frozen` | Fails if `uv.lock` and `pyproject.toml` disagree instead of silently re-resolving. **Use this in CI.** |
-| `uv sync --no-dev` | Production dependencies only — what the Dockerfile does. |
-| `uv run <cmd>` | Runs `<cmd>` inside `.venv`, syncing first if needed. No manual activation. |
-| `uv lock --upgrade` | Re-resolves and rewrites `uv.lock`. The only command that should change it. |
-| `uv add <pkg>` | Adds a dependency to `pyproject.toml` and updates the lockfile. |
+
+| Command             | What it does                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------- |
+| `uv sync --frozen`  | Fails if`uv.lock` and `pyproject.toml` disagree instead of silently re-resolving. **Use this in CI.** |
+| `uv sync --no-dev`  | Production dependencies only — what the Dockerfile does.                                             |
+| `uv run <cmd>`      | Runs`<cmd>` inside `.venv`, syncing first if needed. No manual activation.                            |
+| `uv lock --upgrade` | Re-resolves and rewrites`uv.lock`. The only command that should change it.                            |
+| `uv add <pkg>`      | Adds a dependency to`pyproject.toml` and updates the lockfile.                                        |
 
 `uv run` means you never have to activate anything. If you prefer to, the venv
 is an ordinary one:
@@ -183,13 +185,14 @@ uv tool install poethepoet
 
 The tasks are defined under `[tool.poe.tasks]` in `pyproject.toml`:
 
-| Task | Runs | Purpose |
-|---|---|---|
-| `uv run poe run` | `uvicorn src.app.main:app --host 0.0.0.0 --port 8000` | Serve on all interfaces, as the container does |
-| `uv run poe dev` | `uvicorn ... --host 127.0.0.1 --port 8000 --reload` | Local development with auto-reload |
-| `uv run poe test` | `pytest` | The whole test suite |
-| `uv run poe lint` | `ruff check .` | Static analysis |
-| `uv run poe format` | `ruff format .` | Auto-format |
+
+| Task                | Runs                                                  | Purpose                                        |
+| --------------------- | ------------------------------------------------------- | ------------------------------------------------ |
+| `uv run poe run`    | `uvicorn src.app.main:app --host 0.0.0.0 --port 8000` | Serve on all interfaces, as the container does |
+| `uv run poe dev`    | `uvicorn ... --host 127.0.0.1 --port 8000 --reload`   | Local development with auto-reload             |
+| `uv run poe test`   | `pytest`                                              | The whole test suite                           |
+| `uv run poe lint`   | `ruff check .`                                        | Static analysis                                |
+| `uv run poe format` | `ruff format .`                                       | Auto-format                                    |
 
 List them any time with `uv run poe -h`.
 
@@ -217,11 +220,12 @@ case-insensitively — the `Content-Type` header is ignored.
 curl -X PUT http://localhost:8000/map -F "file=@tests/fixtures/maps/valid/spec_example_3x4.txt"
 ```
 
-| Status | When |
-|---|---|
-| `200` | `{"rows": 3, "cols": 4, "walkable_tiles": 10}` |
-| `415` | The filename extension is not `.txt` or `.json` |
-| `422` | The contents do not describe a valid map |
+
+| Status | When                                           |
+| -------- | ------------------------------------------------ |
+| `200`  | `{"rows": 3, "cols": 4, "walkable_tiles": 10}` |
+| `415`  | The filename extension is not`.txt` or `.json` |
+| `422`  | The contents do not describe a valid map       |
 
 Loading a map replaces the previous one and resets all tile cleanliness, but
 **does not erase session history**.
@@ -265,12 +269,8 @@ tile must have `dirty` omitted or `false`.
 
 Runs one cleaning session on the current map.
 
-Continuing from the `PUT /map` example above — the map is `oxoo / ooxo / oooo`,
-so this route goes down the left edge and back along the bottom row, avoiding
-both walls:
-
 ```bash
-curl -X POST http://localhost:8000/clean -H "Content-Type: application/json" -d '{"start":{"x":0,"y":0},"robot_model":"basic","actions":[{"direction":"south","steps":2},{"direction":"east","steps":3}]}'
+curl -X POST http://localhost:8000/clean -H "Content-Type: application/json" -d '{"start":{"x":0,"y":0},"robot_model":"basic","actions":[{"direction":"east","steps":2},{"direction":"south","steps":1}]}'
 ```
 
 `start`, `robot_model` and `actions` are all required — `actions` may be empty,
@@ -286,37 +286,31 @@ The two robot models differ only in what they bother to clean:
 Both mark a tile clean when they clean it. The starting tile is processed
 before the first action, and each action is executed one step at a time.
 
-| Status | When |
-|---|---|
-| `200` | Session report, `state: "completed"` |
-| `409` | No map has been loaded |
-| `409` | A movement collided with an obstacle or the map boundary |
-| `422` | Malformed request, or a start coordinate outside the map or non-walkable |
 
-The response — this is the actual output of the command above, not an
-illustration:
+| Status | When                                                                     |
+| -------- | -------------------------------------------------------------------------- |
+| `200`  | Session report,`state: "completed"`                                      |
+| `409`  | No map has been loaded                                                   |
+| `409`  | A movement collided with an obstacle or the map boundary                 |
+| `422`  | Malformed request, or a start coordinate outside the map or non-walkable |
+
+A completed report:
 
 ```json
 {
-  "id": "f528a51c-e6d2-4b6e-8791-7f8aa2803257",
-  "started_at": "2026-09-21T21:26:44.965999Z",
-  "finished_at": "2026-09-21T21:26:44.965999Z",
+  "id": "d911422c-18a1-423b-8284-d8c70f769489",
+  "started_at": "2026-07-11T09:30:00Z",
+  "finished_at": "2026-07-11T09:30:00.012Z",
   "state": "completed",
   "robot_model": "basic",
   "submitted_actions": 2,
-  "successful_steps": 5,
-  "cleaned_tiles": [
-    {"x": 0, "y": 0}, {"x": 0, "y": 1}, {"x": 0, "y": 2},
-    {"x": 1, "y": 2}, {"x": 2, "y": 2}, {"x": 3, "y": 2}
-  ],
-  "final_position": {"x": 3, "y": 2},
-  "duration_ms": 0,
+  "successful_steps": 3,
+  "cleaned_tiles": [{"x": 0, "y": 0}, {"x": 1, "y": 0}, {"x": 2, "y": 0}, {"x": 2, "y": 1}],
+  "final_position": {"x": 2, "y": 1},
+  "duration_ms": 12,
   "error": null
 }
 ```
-
-`duration_ms` is genuinely `0`: the session finishes well inside the resolution
-of the system clock.
 
 `submitted_actions` counts action *objects*, not steps. `successful_steps`
 counts movements and excludes processing the starting tile. `cleaned_tiles` is
@@ -327,33 +321,16 @@ ordered by cleaning time, so a coordinate can appear more than once for a
 later step and action, keeps the cleaning it already did, and the session is
 recorded in history with `state: "error"`.
 
-On the same map, stepping east from `(0, 0)` walks straight into the wall at
-`(1, 0)`:
-
-```bash
-curl -X POST http://localhost:8000/clean -H "Content-Type: application/json" -d '{"start":{"x":0,"y":0},"robot_model":"basic","actions":[{"direction":"east","steps":1}]}'
-```
-
-```json
-{
-  "detail": {
-    "state": "error",
-    "successful_steps": 0,
-    "final_position": {"x": 0, "y": 0},
-    "error": {
-      "code": "collision",
-      "message": "The robot cannot enter a non-walkable tile.",
-      "position": {"x": 1, "y": 0}
-    }
-  }
-}
-```
-
-Two things to note. The report is nested under `detail`, because it is returned
-inside FastAPI's `HTTPException` envelope rather than as the bare body — the
-fields above are abridged, the real report carries all eleven. And
-`error.position` is the coordinate the robot *tried* to enter, reported even
-when it lies outside the map.
+> The collision report is returned inside FastAPI's `HTTPException` envelope,
+> so it arrives as `{"detail": { ...report... }}` rather than as the bare body.
+> The report itself carries the same fields as a completed one, plus:
+>
+> ```json
+> {"code": "collision", "message": "The robot cannot enter a non-walkable tile.", "position": {"x": 3, "y": 0}}
+> ```
+>
+> `error.position` is the coordinate the robot *tried* to enter, reported even
+> when it lies outside the map.
 
 ### `GET /history`
 
@@ -363,12 +340,10 @@ Downloads the session history as RFC 4180 CSV (`text/csv`, CRLF terminators).
 curl http://localhost:8000/history
 ```
 
-Header, always, in this exact order. After the two sessions above it returns:
+Header, always, in this exact order:
 
-```csv
+```
 id,started_at,state,robot_model,submitted_actions,successful_steps,cleaned_tiles,duration_ms
-f528a51c-e6d2-4b6e-8791-7f8aa2803257,2026-09-21T21:26:44.965999Z,completed,basic,2,5,6,0
-8f282870-7b66-4440-82af-415b372d7087,2026-09-21T21:26:45.849482Z,error,basic,1,0,1,0
 ```
 
 Both completed and error sessions appear, in creation order, oldest first.
@@ -435,12 +410,13 @@ uv run poe test
 
 Useful invocations:
 
-| Command | Purpose |
-|---|---|
-| `uv run pytest tests/test_robot_session.py` | One module |
-| `uv run pytest -k premium` | Everything matching a name |
-| `uv run pytest -x -vv` | Stop at the first failure, verbose |
-| `uv run pytest --collect-only -q` | List tests without running them |
+
+| Command                                     | Purpose                            |
+| --------------------------------------------- | ------------------------------------ |
+| `uv run pytest tests/test_robot_session.py` | One module                         |
+| `uv run pytest -k premium`                  | Everything matching a name         |
+| `uv run pytest -x -vv`                      | Stop at the first failure, verbose |
+| `uv run pytest --collect-only -q`           | List tests without running them    |
 
 Configuration lives in `[tool.pytest.ini_options]` in `pyproject.toml`.
 `pythonpath = ["."]` is what makes `src.app...` importable, and
@@ -449,18 +425,19 @@ matches nothing into a failure instead of a silent skip.
 
 ### What each module covers
 
-| Module | Tests | Covers |
-|---|---|---|
-| `test_system.py` | 4 | `/health` returns exactly `{"status":"ok"}`; `/docs` and `/openapi.json` are served |
-| `test_map_upload_contract.py` | 152 | Every fixture file under `tests/fixtures/maps/`, driven by directory |
-| `test_map_upload_protocol.py` | 18 | Multipart wiring, filename edge cases, media-type independence, non-UTF-8 bytes, BOM |
-| `test_map_parsers.py` | 18 | Parser units: coordinate orientation, cleanliness defaults, exception types |
-| `test_map_domain_state.py` | 5 | Map replacement, cleanliness reset, history preservation |
-| `test_robot_session.py` | 41 | The cleaning engine: movement deltas, basic vs premium, collisions, history |
-| `test_clean_api.py` | 32 | `POST /clean` contract, including 15 malformed-request cases |
-| `test_history_api.py` | 18 | CSV header, column order, CRLF, ordering, values matching the JSON report |
-| `test_end_to_end_simulation.py` | 1 | One full campaign across every endpoint — see below |
-| `test_fixture_wiring.py` | 22 | Guards on the fixture corpus itself |
+
+| Module                          | Tests | Covers                                                                               |
+| --------------------------------- | ------- | -------------------------------------------------------------------------------------- |
+| `test_system.py`                | 4     | `/health` returns exactly `{"status":"ok"}`; `/docs` and `/openapi.json` are served  |
+| `test_map_upload_contract.py`   | 152   | Every fixture file under`tests/fixtures/maps/`, driven by directory                  |
+| `test_map_upload_protocol.py`   | 18    | Multipart wiring, filename edge cases, media-type independence, non-UTF-8 bytes, BOM |
+| `test_map_parsers.py`           | 18    | Parser units: coordinate orientation, cleanliness defaults, exception types          |
+| `test_map_domain_state.py`      | 5     | Map replacement, cleanliness reset, history preservation                             |
+| `test_robot_session.py`         | 41    | The cleaning engine: movement deltas, basic vs premium, collisions, history          |
+| `test_clean_api.py`             | 32    | `POST /clean` contract, including 15 malformed-request cases                         |
+| `test_history_api.py`           | 18    | CSV header, column order, CRLF, ordering, values matching the JSON report            |
+| `test_end_to_end_simulation.py` | 1     | One full campaign across every endpoint — see below                                 |
+| `test_fixture_wiring.py`        | 22    | Guards on the fixture corpus itself                                                  |
 
 ### The fixture corpus
 
@@ -518,3 +495,16 @@ Stated here rather than left to be discovered:
 - **Nothing is persisted.** Map and history live in module-level globals in
   `src/app/core/state.py` and are lost on restart, which the assignment
   explicitly permits.
+
+## AI Disclosure
+
+I mainly exploited the model **Claude Sonnet 5** for the following tasks:
+
+* Writing this README.md file (excecpt this final section)
+* Writing all the unittest available at `tests` folder
+* Writing the docstring of the functions
+* Writing the Dockerfile
+* Debugging and little fixes
+* Brainstorming
+
+The folder structure, the routes, the main logics of the functions were mainly thought and implemented by myself (and StackOverflow + official documentation / tutorial on the web of course ;) ).
