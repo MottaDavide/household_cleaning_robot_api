@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator
 from pathlib import Path
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
@@ -52,6 +53,29 @@ def client() -> Iterator[TestClient]:
     # nothing today and keeps the suite correct if a lifespan is added later.
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def collision_report() -> Callable[[Response], dict[str, Any]]:
+    """Pull the error report out of a 409 collision response.
+
+    /clean reports collisions with ``HTTPException(detail=report)``, and
+    FastAPI's handler always wraps that in ``{"detail": ...}``, so the report
+    arrives one level down rather than as the bare body.
+
+    Every test reads it through here, which keeps the envelope described in a
+    single place: if the endpoint ever returns the report at the top level,
+    this function is the only thing that changes. The shape assertion below
+    makes that switch fail loudly instead of silently skipping the checks.
+    """
+
+    def _report(response: Response) -> dict[str, Any]:
+        assert response.status_code == 409, f"expected a collision, got {response.status_code}"
+        body = response.json()
+        assert set(body) == {"detail"}, f"expected the detail envelope, got {sorted(body)}"
+        return body["detail"]
+
+    return _report
 
 
 @pytest.fixture

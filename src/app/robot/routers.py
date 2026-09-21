@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import Response
 from src.app.robot.schemas import CleanRequest, CleanReport
 from src.app.robot.services import execute_cleaning_session, generate_csv_history
-from src.app.robot.exceptions import NoMapLoadedError, InvalidStartCoordinateError, CollisionError, InvalidDurationError
+from src.app.robot.exceptions import NoMapLoadedError, InvalidStartCoordinateError, CollisionError
 router = APIRouter(tags=["robot"])
 
 @router.post("/clean", status_code=status.HTTP_200_OK, response_model=CleanReport, summary="Report of the cleaning task")

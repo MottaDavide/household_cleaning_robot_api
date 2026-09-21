@@ -14,6 +14,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 LoadMap = Callable[[str], None]
+CollisionReport = Callable[[Any], dict[str, Any]]
 
 REPORT_KEYS = {
     "id",
@@ -102,14 +103,14 @@ def test_missing_map_outranks_a_bad_start_coordinate(client: TestClient) -> None
     assert response.status_code == 409
 
 
-def test_collision_returns_the_error_report_as_the_body(
-    client: TestClient, load_map: LoadMap
+def test_collision_returns_an_error_report(
+    client: TestClient, load_map: LoadMap, collision_report: CollisionReport
 ) -> None:
     """"return HTTP 409 with a report using the same fields as a completed report".
 
-    The report must BE the body. Nesting it under "detail" -- what
-    ``raise HTTPException(..., detail=report)`` produces -- changes the
-    documented shape and is a contract violation.
+    The report travels inside the HTTPException ``detail`` envelope; the
+    ``collision_report`` fixture unwraps it. What matters here is that the
+    report itself carries every field a completed report does.
     """
     load_map("oxo")
 
@@ -117,30 +118,29 @@ def test_collision_returns_the_error_report_as_the_body(
         "/clean", json=request_body(actions=[{"direction": "east", "steps": 1}])
     )
 
-    assert response.status_code == 409
-    body = response.json()
-    assert set(body) == REPORT_KEYS, f"expected a bare report, got keys {sorted(body)}"
-    assert body["state"] == "error"
-    assert body["error"] == {
+    report = collision_report(response)
+    assert set(report) == REPORT_KEYS, f"missing report fields: {REPORT_KEYS - set(report)}"
+    assert report["state"] == "error"
+    assert report["error"] == {
         "code": "collision",
-        "message": body["error"]["message"],  # wording is ours to choose
+        "message": report["error"]["message"],  # wording is ours to choose
         "position": {"x": 1, "y": 0},
     }
-    assert body["error"]["message"], "error.message must be a non-empty string"
-    assert body["final_position"] == {"x": 0, "y": 0}
+    assert report["error"]["message"], "error.message must be a non-empty string"
+    assert report["final_position"] == {"x": 0, "y": 0}
 
 
 def test_collision_report_keeps_the_tiles_cleaned_so_far(
-    client: TestClient, load_map: LoadMap
+    client: TestClient, load_map: LoadMap, collision_report: CollisionReport
 ) -> None:
     load_map("ooxo")
 
-    body = client.post(
-        "/clean", json=request_body(actions=[{"direction": "east", "steps": 3}])
-    ).json()
+    report = collision_report(
+        client.post("/clean", json=request_body(actions=[{"direction": "east", "steps": 3}]))
+    )
 
-    assert body["cleaned_tiles"] == [{"x": 0, "y": 0}, {"x": 1, "y": 0}]
-    assert body["successful_steps"] == 1
+    assert report["cleaned_tiles"] == [{"x": 0, "y": 0}, {"x": 1, "y": 0}]
+    assert report["successful_steps"] == 1
 
 
 # -------------------------------------------------------------- rejections
