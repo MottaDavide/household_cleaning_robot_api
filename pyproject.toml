@@ -29,7 +29,18 @@ format = "ruff format ."
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "-q"
+addopts = "-q -ra --tb=short"
+strict_markers = true
+strict_config = true
+# A broken fixture glob must break the build. By default an empty parametrize
+# list is reported as a *skip*, which is exactly the silent-green failure this
+# suite is built to avoid.
+empty_parameter_set_mark = "fail_at_collect"
+filterwarnings = [
+    # Starlette 1.6 nudges TestClient users toward httpx2. Not our bug, and
+    # pinning httpx2 is out of scope for this assignment.
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated:UserWarning",
+]
 
 [tool.ruff]
 line-length = 100

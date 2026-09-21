@@ -1,0 +1,102 @@
+{
+  "spec_example_3x4.txt": {
+    "rows": 3,
+    "cols": 4,
+    "walkable_tiles": 10
+  },
+  "spec_example_3x4_no_trailing_newline.txt": {
+    "rows": 3,
+    "cols": 4,
+    "walkable_tiles": 10
+  },
+  "spec_example_3x4_crlf.txt": {
+    "rows": 3,
+    "cols": 4,
+    "walkable_tiles": 10
+  },
+  "spec_example_3x4_crlf_no_trailing_newline.txt": {
+    "rows": 3,
+    "cols": 4,
+    "walkable_tiles": 10
+  },
+  "min_1x1_walkable.txt": {
+    "rows": 1,
+    "cols": 1,
+    "walkable_tiles": 1
+  },
+  "min_1x1_blocked.txt": {
+    "rows": 1,
+    "cols": 1,
+    "walkable_tiles": 0
+  },
+  "single_row_1x4.txt": {
+    "rows": 1,
+    "cols": 4,
+    "walkable_tiles": 3
+  },
+  "single_column_4x1.txt": {
+    "rows": 4,
+    "cols": 1,
+    "walkable_tiles": 3
+  },
+  "all_walkable_2x3.txt": {
+    "rows": 2,
+    "cols": 3,
+    "walkable_tiles": 6
+  },
+  "all_blocked_2x3.txt": {
+    "rows": 2,
+    "cols": 3,
+    "walkable_tiles": 0
+  },
+  "uppercase_extension.TXT": {
+    "rows": 2,
+    "cols": 2,
+    "walkable_tiles": 4
+  },
+  "mixed_case_extension.TxT": {
+    "rows": 1,
+    "cols": 2,
+    "walkable_tiles": 1
+  },
+  "spec_example_2x3.json": {
+    "rows": 2,
+    "cols": 3,
+    "walkable_tiles": 5
+  },
+  "min_1x1_walkable.json": {
+    "rows": 1,
+    "cols": 1,
+    "walkable_tiles": 1
+  },
+  "dirty_omitted_defaults_dirty.json": {
+    "rows": 1,
+    "cols": 2,
+    "walkable_tiles": 2
+  },
+  "non_walkable_dirty_false.json": {
+    "rows": 1,
+    "cols": 2,
+    "walkable_tiles": 1
+  },
+  "non_walkable_dirty_omitted.json": {
+    "rows": 1,
+    "cols": 2,
+    "walkable_tiles": 1
+  },
+  "tiles_out_of_order.json": {
+    "rows": 2,
+    "cols": 2,
+    "walkable_tiles": 4
+  },
+  "all_blocked_2x2.json": {
+    "rows": 2,
+    "cols": 2,
+    "walkable_tiles": 0
+  },
+  "uppercase_extension.JSON": {
+    "rows": 1,
+    "cols": 1,
+    "walkable_tiles": 1
+  }
+}

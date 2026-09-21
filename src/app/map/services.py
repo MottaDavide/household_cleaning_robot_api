@@ -105,7 +105,10 @@ def process_map_upload(filename: str, content: bytes) -> dict:
     
     
     if extension == ".txt":
-        text_content = content.decode("utf-8")
+        try:
+            text_content = content.decode("utf-8")
+        except UnicodeDecodeError as e:
+            raise InvalidMapContentError("The TXT map must be valid UTF-8 text.") from e
         tiles, rows, cols = _parse_txt_map(text_content=text_content)
         
     elif extension == ".json":

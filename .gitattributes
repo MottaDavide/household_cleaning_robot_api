@@ -1,0 +1,4 @@
+# Map fixtures are byte-sensitive: the suite asserts on CRLF vs LF, on how many
+# trailing line endings a file has, and on bytes that are not valid UTF-8.
+# Git must never normalise them, on any platform.
+tests/fixtures/maps/** -text

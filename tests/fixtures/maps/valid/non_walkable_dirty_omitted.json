@@ -1,0 +1,17 @@
+{
+  "rows": 1,
+  "cols": 2,
+  "tiles": [
+    {
+      "x": 0,
+      "y": 0,
+      "walkable": true,
+      "dirty": true
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "walkable": false
+    }
+  ]
+}
