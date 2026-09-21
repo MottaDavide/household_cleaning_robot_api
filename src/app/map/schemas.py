@@ -1,15 +1,15 @@
 from src.app.schemas import CustomBase
-from pydantic import Field
+from pydantic import Field, StrictInt
 
 class MapResponse(CustomBase):
-    rows: int
-    cols: int
-    walkable_tiles: int
+    rows: StrictInt
+    cols: StrictInt
+    walkable_tiles: StrictInt
     
     
 class TileSchema(CustomBase):
-    x: int
-    y: int
+    x: StrictInt
+    y: StrictInt
     walkable: bool
     dirty: bool | None = None
     

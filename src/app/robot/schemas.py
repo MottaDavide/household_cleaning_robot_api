@@ -1,5 +1,5 @@
 from src.app.schemas import CustomBase
-from pydantic import Field
+from pydantic import Field, StrictInt
 from uuid import UUID
 from datetime import datetime
 from enum import StrEnum
@@ -33,8 +33,8 @@ class SessionState(StrEnum):
     
     
 class Coordinate(CustomBase):
-    x: int
-    y: int
+    x: StrictInt
+    y: StrictInt
     
 class Action(CustomBase):
     direction: Direction
