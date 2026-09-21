@@ -22,8 +22,8 @@ import pytest
 from tests.map_cases import (
     EXPECTED_STATUS_BY_BUCKET,
     FIXTURES_ROOT,
-    MAP_CASES,
     MANIFEST_NAME,
+    MAP_CASES,
     VALID_CASES,
     load_manifest,
 )
@@ -138,7 +138,10 @@ def test_lone_carriage_return_fixture_has_no_line_feed() -> None:
 def test_cyrillic_lookalike_is_valid_utf8_but_not_an_ascii_o() -> None:
     """The point of this fixture is that it *looks* like a legal map."""
     data = fixture("invalid_content", "cyrillic_o_lookalike.txt").read_bytes()
-    assert data.decode("utf-8")[0] == "о"  # renders as 'o', is not 'o'
+    # Compared by codepoint on purpose: writing the character itself would put
+    # an invisible ASCII-o lookalike into the source, which is the trap this
+    # fixture exists to catch.
+    assert ord(data.decode("utf-8")[0]) == 0x43E  # CYRILLIC SMALL LETTER O
 
 
 def test_unsupported_extension_fixtures_hold_valid_map_content() -> None:
