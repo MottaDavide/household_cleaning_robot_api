@@ -32,10 +32,10 @@ async def clean(request: CleanRequest):
         ) from e
         
     except CollisionError as e:
-        raise JSONResponse(
+        return  JSONResponse(
             status_code=status.HTTP_409_CONFLICT, 
             content=e.report.model_dump(mode='json') # pdf dice che vuole body=report
-        ) from e
+        )
         
         
 @router.get("/history", status_code=status.HTTP_200_OK, summary="Download cleaning-session history as RFC 4180-compatible CSV.",
