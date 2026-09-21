@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
-from app.robot.schemas import CleanRequest, CleanReport
-from app.robot.service import execute_cleaning_session
-from app.robot.exceptions import NoMapLoadedError, InvalidStartCoordinateError, CollisionError
+from src.app.robot.schemas import CleanRequest, CleanReport
+from src.app.robot.services import execute_cleaning_session
+from src.app.robot.exceptions import NoMapLoadedError, InvalidStartCoordinateError, CollisionError
 
 router = APIRouter(tags=["Robot"])
 
@@ -26,5 +26,5 @@ def clean(request: CleanRequest):
     except CollisionError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, 
-            detail=e.report.model_dump(mode='json')
+            content=e.report.model_dump(mode='json') # pdf dice che vuole body=report
         ) from e

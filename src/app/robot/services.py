@@ -79,7 +79,7 @@ def execute_cleaning_session(request: CleanRequest) -> CleanReport:
             if next_pos not in state.current_map or not state.current_map[next_pos]["walkable"]:
                 error = ErrorDetails(
                     message = "The robot cannot enter a non-walkable tile.", # error.message is a non-empty human-readable string.
-                    position = Coordinate(next_pos[0], next_pos[1])  # error.position is the coordinate the robot attempted to enter, even when it is outside the map;
+                    position = Coordinate(x=next_pos[0], y=next_pos[1])  # error.position is the coordinate the robot attempted to enter, even when it is outside the map;
                 )
                 
                 report = _create_report(
@@ -99,7 +99,7 @@ def execute_cleaning_session(request: CleanRequest) -> CleanReport:
         submitted_actions=len(request.actions), successful_steps=successful_steps, cleaned_tiles=cleaned_tiles,
         final_pos=current_pos, # leave final_position at the last valid coordinate;
                     error_details=None)
-    state.sessions_history.append(report.model_dump(mode='json'))
+    state.session_history.append(report.model_dump(mode='json'))
 
     return report
     

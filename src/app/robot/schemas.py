@@ -6,14 +6,14 @@ from enum import StrEnum
 
 
 # pdf states there are 2 robot models
-class RobotModel(CustomBase, StrEnum):
-    BASIC = Field(default = "basic", description = "performs and reports a cleaning operation on every walkable tile it visits, even when that tile is already clean")
-    PREMIUM = Field(defualt = "premium", description = "performs and reports a cleaning operation only when the visited tile is currently dirty. It skips a clean tile.")
+class RobotModel(StrEnum):
+    BASIC =  "basic"
+    PREMIUM =  "premium"
     
     
 # 4 directions (always from pdf)
-class Direction(CustomBase, StrEnum):
-    NORTH = 'norht'
+class Direction(StrEnum):
+    NORTH = 'north'
     EAST = 'east'
     SOUTH = 'south'
     WEST = 'west'
@@ -26,7 +26,7 @@ MOVEMENT_DELTAS = {
 }
     
 
-class SessionState(CustomBase, StrEnum):
+class SessionState(StrEnum):
     COMPLETED = "completed"
     ERROR = "error"
     
