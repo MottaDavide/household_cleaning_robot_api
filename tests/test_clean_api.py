@@ -108,9 +108,9 @@ def test_collision_returns_an_error_report(
 ) -> None:
     """"return HTTP 409 with a report using the same fields as a completed report".
 
-    The report travels inside the HTTPException ``detail`` envelope; the
-    ``collision_report`` fixture unwraps it. What matters here is that the
-    report itself carries every field a completed report does.
+    The report is the response body itself, not nested inside an envelope; the
+    ``collision_report`` fixture reads it and guards that shape. What matters
+    here is that the report carries every field a completed report does.
     """
     load_map("oxo")
 

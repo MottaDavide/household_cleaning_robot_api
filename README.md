@@ -261,6 +261,13 @@ tile must have `dirty` omitted or `false`.
 }
 ```
 
+**Type strictness.** `rows`, `cols`, `x` and `y` must be JSON integers:
+`"1"`, `true` and `1.0` are all rejected, and `rows`/`cols` must still be
+positive. `walkable` and `dirty` are deliberately left lax and do accept
+`"true"` — the contract says that "rejecting other JSON types coerced to a
+boolean … is not required". That waiver covers the boolean fields only, which
+is why the integer fields are held to the stricter rule.
+
 **Coordinates.** `(0, 0)` is top-left, `x` grows east (right), `y` grows south
 (down). Movement deltas: `north` `(x, y-1)`, `east` `(x+1, y)`, `south`
 `(x, y+1)`, `west` `(x-1, y)`.
@@ -276,6 +283,9 @@ curl -X POST http://localhost:8000/clean -H "Content-Type: application/json" -d 
 `start`, `robot_model` and `actions` are all required — `actions` may be empty,
 but it must be present. `robot_model` is `basic` or `premium`; `direction` is
 one of `north`/`east`/`south`/`west`, lowercase; `steps` is a positive integer.
+`start.x`, `start.y` and `steps` are validated strictly, so `"2"`, `true` and
+`2.0` are all `422`. Watch the bool: `true` would otherwise coerce to `1` and
+silently run a single step, since `bool` is a subclass of `int` in Python.
 
 The two robot models differ only in what they bother to clean:
 
@@ -321,9 +331,10 @@ ordered by cleaning time, so a coordinate can appear more than once for a
 later step and action, keeps the cleaning it already did, and the session is
 recorded in history with `state: "error"`.
 
-> The collision report is returned inside FastAPI's `HTTPException` envelope,
-> so it arrives as `{"detail": { ...report... }}` rather than as the bare body.
-> The report itself carries the same fields as a completed one, plus:
+> The collision report **is** the response body. `/clean` returns
+> `JSONResponse(status_code=409, content=report)` rather than raising
+> `HTTPException`, whose handler would nest it under `detail`. It carries the
+> same fields as a completed report, plus:
 >
 > ```json
 > {"code": "collision", "message": "The robot cannot enter a non-walkable tile.", "position": {"x": 3, "y": 0}}
@@ -331,6 +342,11 @@ recorded in history with `state: "error"`.
 >
 > `error.position` is the coordinate the robot *tried* to enter, reported even
 > when it lies outside the map.
+>
+> The two `409`s do not share a body shape: the no-map case stays an
+> `HTTPException`, so it is `{"detail": "Map not found."}`. That is deliberate —
+> the assignment specifies a body for the collision report and leaves ordinary
+> error bodies free.
 
 ### `GET /history`
 
@@ -387,7 +403,8 @@ logic), `exceptions.py` (domain errors the router maps to status codes).
 │   └── robot/
 │       ├── routers.py           POST /clean and GET /history
 │       ├── schemas.py           RobotModel, Direction, MOVEMENT_DELTAS, Action,
-│       │                        CleanRequest, CleanReport, ErrorDetails
+│       │                        CleanRequest, CleanReport, ErrorDetails,
+│       │                        CsvResponse (the text/csv response class)
 │       ├── services.py          execute_cleaning_session and generate_csv_history
 │       └── exceptions.py        NoMapLoadedError, InvalidStartCoordinateError,
 │                                CollisionError (carries the report)
@@ -481,17 +498,11 @@ one side stays invisible until something reads both.
 
 Stated here rather than left to be discovered:
 
-- **`uv run poe lint` reports 30 errors**, all in `src/` — unsorted imports and
+* There is no logger. Very useful for debugging.
+
+- **`uv run poe lint` reports 31 errors**, all in `src/` — unsorted imports and
   lines over 100 characters. `tests/` is clean. Twelve are auto-fixable with
   `uv run ruff check --fix src/`.
-- **`/openapi.json` under-documents the error codes.** The schema advertises
-  only `200` and `422` for `/map` and `/clean`; the `415` and `409` cases
-  described above are real but not declared, because the routes do not pass a
-  `responses={...}` argument.
-- **The collision body is nested under `detail`**, as noted in the `POST /clean`
-  section. The assignment describes it as "a report using the same fields as a
-  completed report", which reads as the bare body; this is a deliberate
-  deviation, and the test suite pins the shape actually served.
 - **Nothing is persisted.** Map and history live in module-level globals in
   `src/app/core/state.py` and are lost on restart, which the assignment
   explicitly permits.

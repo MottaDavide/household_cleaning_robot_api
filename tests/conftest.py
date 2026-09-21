@@ -57,23 +57,24 @@ def client() -> Iterator[TestClient]:
 
 @pytest.fixture
 def collision_report() -> Callable[[Response], dict[str, Any]]:
-    """Pull the error report out of a 409 collision response.
+    """Read the error report off a 409 collision response.
 
-    /clean reports collisions with ``HTTPException(detail=report)``, and
-    FastAPI's handler always wraps that in ``{"detail": ...}``, so the report
-    arrives one level down rather than as the bare body.
+    /clean returns the report as the bare body -- ``JSONResponse(status_code=409,
+    content=report)`` rather than ``HTTPException``, whose handler would wrap it
+    in ``{"detail": ...}``. The contract asks for "a report using the same fields
+    as a completed report", so the report *is* the body.
 
-    Every test reads it through here, which keeps the envelope described in a
-    single place: if the endpoint ever returns the report at the top level,
-    this function is the only thing that changes. The shape assertion below
-    makes that switch fail loudly instead of silently skipping the checks.
+    Every test reads it through here, which keeps that shape described in a
+    single place. The assertion below is what makes a regression back into an
+    envelope fail loudly, instead of the checks downstream of it quietly
+    inspecting the wrapper.
     """
 
     def _report(response: Response) -> dict[str, Any]:
         assert response.status_code == 409, f"expected a collision, got {response.status_code}"
         body = response.json()
-        assert set(body) == {"detail"}, f"expected the detail envelope, got {sorted(body)}"
-        return body["detail"]
+        assert "detail" not in body, f"the report must be the bare body, got {sorted(body)}"
+        return body
 
     return _report
 
