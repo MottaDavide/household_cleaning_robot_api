@@ -14,6 +14,6 @@ class TileSchema(CustomBase):
     dirty: bool | None = None
     
 class JsonMapSchema(CustomBase):
-    rows: int = Field(..., gt=0)
-    cols: int = Field(..., gt=0)
+    rows: int = Field(..., gt=0, strict=True)
+    cols: int = Field(..., gt=0, strict=True)
     tiles: list[TileSchema]

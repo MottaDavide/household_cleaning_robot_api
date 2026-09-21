@@ -38,7 +38,7 @@ class Coordinate(CustomBase):
     
 class Action(CustomBase):
     direction: Direction
-    steps: int = Field(..., gt=0)
+    steps: int = Field(..., gt=0, strict=True)
     
 class CleanRequest(CustomBase):
     start: Coordinate
