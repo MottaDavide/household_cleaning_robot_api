@@ -119,15 +119,18 @@ def test_collision_returns_an_error_report(
     )
 
     report = collision_report(response)
-    assert set(report) == REPORT_KEYS, f"missing report fields: {REPORT_KEYS - set(report)}"
+
+    assert set(report) == REPORT_KEYS, f"report fields differ: {set(report) ^ REPORT_KEYS}"
     assert report["state"] == "error"
-    assert report["error"] == {
-        "code": "collision",
-        "message": report["error"]["message"],  # wording is ours to choose
-        "position": {"x": 1, "y": 0},
-    }
-    assert report["error"]["message"], "error.message must be a non-empty string"
     assert report["final_position"] == {"x": 0, "y": 0}
+
+    error = report["error"]
+    assert set(error) == {"code", "message", "position"}
+    assert error["code"] == "collision"
+    assert error["position"] == {"x": 1, "y": 0}
+    # The contract fixes code and position but leaves the wording to us -- so
+    # this asserts a non-empty human-readable string exists, not what it says.
+    assert isinstance(error["message"], str) and error["message"].strip()
 
 
 def test_collision_report_keeps_the_tiles_cleaned_so_far(
