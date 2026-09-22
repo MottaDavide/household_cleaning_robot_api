@@ -41,12 +41,5 @@ async def clean(request: CleanRequest):
 @router.get("/history", status_code=status.HTTP_200_OK, summary="Download cleaning-session history as RFC 4180-compatible CSV.",
             response_class = CsvResponse)
 async def get_history() -> CsvResponse:
-    try: # probabilmente potrei farne a meno del try. Tanto va anche con lista vuota...
-        csv_content = generate_csv_history()
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Impossible to generate the downloadable history",
-        ) from e
-        
+    csv_content = generate_csv_history()
     return CsvResponse(content=csv_content, media_type="text/csv")

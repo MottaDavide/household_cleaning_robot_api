@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import datetime
 from enum import StrEnum
 from fastapi.responses import Response
-
+from typing import Literal
 
 # pdf states there are 2 robot models
 class RobotModel(StrEnum):
@@ -46,7 +46,7 @@ class CleanRequest(CustomBase):
     actions: list[Action]
     
 class ErrorDetails(CustomBase):
-    code: str = "collision" 
+    code: Literal["collision"] = "collision"
     message: str
     position: Coordinate
 

@@ -17,12 +17,8 @@ router = APIRouter(
 async def upload_map(file: UploadFile ) -> MapResponse:
     filename = file.filename or ""
     
-    try:
-        content = await file.read()
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Impossible to read the file."
-        ) from e
+    content = await file.read()
+
         
     try:
         summary_dict = process_map_upload(filename, content)

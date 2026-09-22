@@ -49,9 +49,16 @@ def _create_report(
         error=error_details
     )
 
+# preferisco separare le due casistiche "fuori mappa" e "tile non-walkable"
+def _collision_message(pos):
+    if pos not in state.current_map:
+        return "The robot cannot move outside the map."
+    if not state.current_map[pos]["walkable"]:
+        return "The robot cannot enter a non-walkable tile."
+    return None
 
 def execute_cleaning_session(request: CleanRequest) -> CleanReport:
-    started_at = datetime.now(UTC) 
+    started_at = datetime.now(UTC) # dovrebbe mantenere lo standard quando poi fastapi/pydantic passano al rispettivo json
     
     
     if state.current_map is None: # pdf parla di errore 409 quando la mappa non è caricata
@@ -78,9 +85,10 @@ def execute_cleaning_session(request: CleanRequest) -> CleanReport:
             next_pos = (current_pos[0] + dx, current_pos[1] + dy)
             
             # da pdf: When the next step would enter a non-walkable tile or leave the map: stop before entering the invalid coordinate;
-            if next_pos not in state.current_map or not state.current_map[next_pos]["walkable"]:
+            collision = _collision_message(next_pos)
+            if collision is not None:
                 error = ErrorDetails(
-                    message = "The robot cannot enter a non-walkable tile.", # error.message is a non-empty human-readable string.
+                    message = collision, # error.message is a non-empty human-readable string.
                     position = Coordinate(x=next_pos[0], y=next_pos[1])  # error.position is the coordinate the robot attempted to enter, even when it is outside the map;
                 )
                 
