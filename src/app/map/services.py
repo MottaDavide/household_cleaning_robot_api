@@ -1,3 +1,10 @@
+"""Reading and validating the map files clients upload.
+
+Each private parser handles one format and returns the same thing: the tiles
+keyed by coordinate, plus the size of the grid. ``process_map_upload`` picks
+the right one and installs the result as the current map.
+"""
+
 # Metto qui i vari parser delle tipologie dell mappe e la funzione principale (che fa anche check)
 from src.app.map.exceptions import InvalidMapContentError, UnsupportedExtensionError
 from src.app.map.schemas import JsonMapSchema
@@ -7,6 +14,21 @@ from pathlib import Path
 
 # seguo da txt map format nel pdf
 def _parse_txt_map(text_content: str) -> tuple[dict, int, int]:
+    """Turn a TXT grid into the tile dictionary the rest of the app uses.
+
+    ``o`` is a walkable tile that starts dirty, ``x`` an obstacle. Windows
+    line endings work, and one line ending after the last row is ignored.
+
+    Args:
+        text_content: The uploaded file, already decoded as text.
+
+    Returns:
+        The tiles keyed by ``(x, y)``, the row count, and the column count.
+
+    Raises:
+        InvalidMapContentError: If the grid is empty, a row is blank or of a
+            different width, or a character other than ``o`` or ``x`` appears.
+    """
     
     normalized_text = text_content.replace("\r\n", "\n")
     if normalized_text.endswith("\n"):
@@ -49,6 +71,23 @@ def _parse_txt_map(text_content: str) -> tuple[dict, int, int]:
     
 # come sopra ma per il json
 def _parse_json_map(content: bytes)-> tuple[dict, int, int]:
+    """Turn a JSON map document into the same tile dictionary as the TXT one.
+
+    ``JsonMapSchema`` has already checked shape and types, so what is left
+    are the value rules: each coordinate inside the rectangle exactly once,
+    a walkable tile without ``dirty`` starting dirty, and a non-walkable
+    tile never being dirty.
+
+    Args:
+        content: The raw bytes of the uploaded file.
+
+    Returns:
+        The same tuple the TXT parser returns.
+
+    Raises:
+        InvalidMapContentError: If the bytes are not valid JSON, the document
+            does not match the schema, or any rule above is broken.
+    """
     try:
         data = json.loads(content)
     except Exception as e:
@@ -97,6 +136,25 @@ def _parse_json_map(content: bytes)-> tuple[dict, int, int]:
 
 # Funzione principale
 def process_map_upload(filename: str, content: bytes) -> dict:
+    """Validate an uploaded file and make it the map the robot works on.
+
+    The parser is chosen by the filename extension and nothing else, so the
+    media type is ignored. A successful upload replaces the previous map and
+    resets every tile's cleanliness, but keeps the session history.
+
+    Args:
+        filename: The name the file arrived under. Only the extension counts.
+        content: The raw bytes of the file.
+
+    Returns:
+        The summary the endpoint returns: rows, columns, walkable tiles.
+
+    Raises:
+        UnsupportedExtensionError: If the extension is not ``.txt`` or
+            ``.json``. Checked before the content is read.
+        InvalidMapContentError: If the file does not describe a valid map,
+            including a TXT file that is not valid UTF-8 text.
+    """
     extension = Path(filename).suffix.lower()
     
     # extension check

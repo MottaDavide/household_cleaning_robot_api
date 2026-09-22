@@ -15,6 +15,15 @@ router = APIRouter(tags=["robot"])
     },
 },)
 async def clean(request: CleanRequest):
+    """Run a single cleaning session on the map that is currently loaded.
+
+    The robot cleans the tile it starts on, then walks the requested actions
+    one step at a time. A session that gets through every action returns a
+    completed report. One that walks into an obstacle or off the edge of the
+    map stops there and returns an error report with the same fields, so a
+    client can read either outcome the same way. Both are added to the
+    history.
+    """
     
     try:
         return execute_cleaning_session(request)
@@ -41,5 +50,12 @@ async def clean(request: CleanRequest):
 @router.get("/history", status_code=status.HTTP_200_OK, summary="Download cleaning-session history as RFC 4180-compatible CSV.",
             response_class = CsvResponse)
 async def get_history() -> CsvResponse:
+    """Download the history of every cleaning session as CSV.
+
+    Sessions are listed oldest first, both those that completed and those
+    that ended in a collision. A session rejected before it could start never
+    ran, so it is not listed. The history survives a new map being loaded,
+    and lasts as long as the running service.
+    """
     csv_content = generate_csv_history()
     return CsvResponse(content=csv_content, media_type="text/csv")

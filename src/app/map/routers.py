@@ -15,6 +15,16 @@ router = APIRouter(
     422: {"description": "The file contents do not describe a valid map"},
 },)
 async def upload_map(file: UploadFile ) -> MapResponse:
+    """Load a map, replacing whatever map was loaded before it.
+
+    Sent as a multipart form upload under the field name ``file``. The format
+    comes from the filename extension, compared without regard to case:
+    ``.txt`` for a grid of ``o`` and ``x``, ``.json`` for a document listing
+    every tile. The media type is ignored.
+
+    Loading a map resets every tile's cleanliness but keeps the session
+    history.
+    """
     filename = file.filename or ""
     
     content = await file.read()
