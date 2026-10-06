@@ -15,7 +15,7 @@ import csv # RFC 4180
 import io
 
 
-def _process_tile(pos: tuple[int, int], robot_model: RobotModel, cleaned_tiles: list[Coordinate]) -> None:
+def _process_tile(pos: tuple[int, int], robot_model: RobotModel, cleaned_tiles: list[Coordinate]) -> None: # aggiungi repo: MapRepository se avessi lo stato in Postgress
     """Clean the tile the robot is standing on, if this robot would clean it.
 
     The one place the two models differ: a basic robot cleans every walkable
@@ -28,6 +28,9 @@ def _process_tile(pos: tuple[int, int], robot_model: RobotModel, cleaned_tiles: 
         robot_model: Which model is running the session.
         cleaned_tiles: The session's cleaned coordinates, appended to here.
     """
+    # se avessi lo stato in Postgres persistente. Qui farei 
+    # current_ = await repo.get_current()
+    # is_dirty = current_[pos]["dirty"]
     is_dirty = state.current_map[pos]["dirty"]
     
     # come da pdf -> report basic su tutte le mattonelee, premium solo sulle sporche
@@ -35,7 +38,7 @@ def _process_tile(pos: tuple[int, int], robot_model: RobotModel, cleaned_tiles: 
         cleaned_tiles.append(Coordinate(x=pos[0], y=pos[1]))
         
         # come da pdf se viene compiuta la polizia allora la mattonella non è più dirty
-        state.current_map[pos]["dirty"] = False
+        state.current_map[pos]["dirty"] = False # await repo.mark_clean(pos) # se avessi lo stato in Postgres persistente. Qui faccio in memoria
         
         
 def _create_report(
