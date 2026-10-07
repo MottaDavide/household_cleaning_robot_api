@@ -7,11 +7,13 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
     "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
     "pydantic>=2.9",
     "python-multipart>=0.0.9",
     "scikit-learn>=1.9.1",
     "sqlalchemy",
     "torch>=2.14.1",
+    "torchvision>=0.29.1",
     "uvicorn[standard]>=0.30",
 ]
 
